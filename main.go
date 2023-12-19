@@ -1,27 +1,35 @@
 package main
 
 import "fmt" 
+type dictionnaire struct {
+    m map[string]int
+}
+
 func main() { 
-	fmt.Println("👋 Hello World.")
-	m := make(map[string]int)
-	m["k1"] = 7
-    m["k2"] = 13
-	get(m, "k1")
-	remove(m, "k2")
-	list(m)
-
+	
+	dict := dictionnaire{m: make(map[string]int)}
+	dict.add("one", 1)
+	dict.add("two", 2)
+	dict.get("one")
+	dict.list()
+	dict.remove("two")
 }
 
-func get(m map[string]int, key string) int {
-	return m[key]
+func (dict dictionnaire) add( key string, value int) {
+	dict.m[key] = value
+	
 }
 
-func remove(m map[string]int, key string) {
-	delete(m, key)
+func  (dict dictionnaire) get( key string) int {
+	return dict.m[key]
 }
 
-func list(m map[string]int) {
-	for key, value := range m {
+func (dict dictionnaire) remove( key string) {
+	delete(dict.m, key)
+}
+
+func  (dict dictionnaire) list() {
+	for key, value := range dict.m {
 		fmt.Println(key, value)
 	}
 }
