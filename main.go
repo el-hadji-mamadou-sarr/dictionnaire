@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 type Entry struct {
@@ -15,25 +15,30 @@ type dictionnaire struct {
 	filePath string
 }
 
+func (dict *dictionnaire) run_test(){
+	// dict.add("one", "its a number")
+	// dict.add("two", "its the result of 1+1")
+	fmt.Println("Get 'one':", dict.get("one"))
+	// dict.list()
+	// dict.remove("two")
+	dict.list()
+}
 
 func main() {
 	filePath := "dictionary.json"
 	dict := newDictionary(filePath)
+	dict.run_test()
 	
-	dict.add("one", "its a number")
-	dict.add("two", "its the result of 1+1")
-	fmt.Println("Get 'one':", dict.get("one"))
-	dict.list()
-	dict.remove("two")
-	dict.list()
 }
+
+
 func (dict *dictionnaire) saveToFile(entries []Entry) error {
 	jsonData, err := json.MarshalIndent(entries, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(dict.filePath, jsonData, 644)
+	err = os.WriteFile(dict.filePath, jsonData, 644)
 	if err != nil {
 		return err
 	}
@@ -42,7 +47,7 @@ func (dict *dictionnaire) saveToFile(entries []Entry) error {
 }
 
 func (dict *dictionnaire) loadFromFile() ([]Entry, error) {
-	jsonData, err := ioutil.ReadFile(dict.filePath)
+	jsonData, err := os.ReadFile(dict.filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -79,6 +84,16 @@ func (dict *dictionnaire) add(name string, definition string) {
 	if err != nil {
 		fmt.Println("Error loading from file:", err)
 		return
+	}
+
+	// check if the name already exists in the dictionnary
+	for i, entry := range entries {
+		if entry.Name == name {
+			fmt.Printf("Updating existing entry '%s': %s to %s\n", name, entry.Definition, definition)
+			entries[i].Definition = definition
+			dict.saving(entries)
+			return
+		}
 	}
 
 	entry := Entry{Name: name, Definition: definition}
@@ -132,6 +147,6 @@ func (dict *dictionnaire) list() {
 	}
 
 	for _, entry := range entries {
-		fmt.Println(entry)
+		fmt.Println( entry.Name, ":", entry.Definition)
 	}
 }

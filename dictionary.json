@@ -1,6 +1,6 @@
 [
   {
-    "key": "one",
-    "value": "its a number"
+    "name": "one",
+    "definition": "its a number"
   }
 ]
