@@ -1,39 +1,64 @@
 package main
 
-import "fmt" 
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+)
+
 type dictionnaire struct {
-    m map[string]int
+	filePath string
+	entries  map[string]int
 }
 
-func main() { 
-	
-	dict := new()
+func main() {
+	filePath := "dictionary.json"
+	dict := newDictionary(filePath)
+
 	dict.add("one", 1)
 	dict.add("two", 2)
-	dict.get("one")
+	fmt.Println("Get 'one':", dict.get("one"))
 	dict.list()
 	dict.remove("two")
+	dict.list()
 }
 
-func new() dictionnaire {
-	return dictionnaire{m: make(map[string]int)}
+func newDictionary(filePath string) dictionnaire {
+	return dictionnaire{
+		filePath: filePath,
+		entries:  make(map[string]int),
+	}
 }
 
-func (dict dictionnaire) add( key string, value int) {
-	dict.m[key] = value
-	
+func (dict *dictionnaire) add(key string, value int) {
+	dict.entries[key] = value
+	if err := dict.saveToFile(); err != nil {
+		fmt.Println("Error saving to file:", err)
+	}
 }
 
-func  (dict dictionnaire) get( key string) int {
-	return dict.m[key]
+func (dict *dictionnaire) get(key string) int {
+	return dict.entries[key]
 }
 
-func (dict dictionnaire) remove( key string) {
-	delete(dict.m, key)
+func (dict *dictionnaire) remove(key string) {
+	delete(dict.entries, key)
+	if err := dict.saveToFile(); err != nil {
+		fmt.Println("Error saving to file:", err)
+	}
 }
 
-func  (dict dictionnaire) list() {
-	for key, value := range dict.m {
+func (dict *dictionnaire) list() {
+	for key, value := range dict.entries {
 		fmt.Println(key, value)
 	}
+}
+
+func (dict *dictionnaire) saveToFile() error {
+	data, err := json.MarshalIndent(dict.entries, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(dict.filePath, data, 0644)
 }
