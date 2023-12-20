@@ -7,8 +7,8 @@ import (
 )
 
 type Entry struct {
-	Key   string `json:"key"`
-	Value int    `json:"value"`
+	Name  string `json:"name"`
+	Definition string    `json:"definition"`
 }
 
 type dictionnaire struct {
@@ -20,8 +20,8 @@ func main() {
 	filePath := "dictionary.json"
 	dict := newDictionary(filePath)
 	
-	dict.add("one", 1)
-	dict.add("two", 2)
+	dict.add("one", "its a number")
+	dict.add("two", "its the result of 1+1")
 	fmt.Println("Get 'one':", dict.get("one"))
 	dict.list()
 	dict.remove("two")
@@ -74,37 +74,37 @@ func newDictionary(filePath string) dictionnaire {
 	}
 }
 
-func (dict *dictionnaire) add(key string, value int) {
+func (dict *dictionnaire) add(name string, definition string) {
 	entries, err := dict.loadFromFile()
 	if err != nil {
 		fmt.Println("Error loading from file:", err)
 		return
 	}
 
-	entry := Entry{Key: key, Value: value}
+	entry := Entry{Name: name, Definition: definition}
 	entries = append(entries, entry)
 	dict.saving(entries)
 }
 
-func (dict *dictionnaire) get(key string) int {
+func (dict *dictionnaire) get(name string) string {
 	entries, err := dict.loadFromFile()
 	if err != nil {
 		fmt.Println("Error loading from file:", err)
-		return 0
+		return ""
 	}
 
 	for _, entry := range entries {
-		if entry.Key == key {
-			fmt.Println("Found:", entry)
-			return entry.Value
+		fmt.Println("Found:", entry)
+		if entry.Name == name {
+			return entry.Definition
 		}
 	}
 
-	fmt.Println("Key not found:", key)
-	return 0
+	fmt.Println("Key not found:", name)
+	return ""
 }
 
-func (dict *dictionnaire) remove(key string) {
+func (dict *dictionnaire) remove(name string) {
 	entries, err := dict.loadFromFile()
 	if err != nil {
 		fmt.Println("Error loading from file:", err)
@@ -112,7 +112,7 @@ func (dict *dictionnaire) remove(key string) {
 	}
 
 	for i, entry := range entries {
-		if entry.Key == key {
+		if entry.Name == name {
 			fmt.Println("Removing:", entry)
 			// Remove the entry from the slice
 			entries = append(entries[:i], entries[i+1:]...)
@@ -121,7 +121,7 @@ func (dict *dictionnaire) remove(key string) {
 		}
 	}
 
-	fmt.Println("Key not found:", key)
+	fmt.Println("Key not found:", name)
 }
 
 func (dict *dictionnaire) list() {
