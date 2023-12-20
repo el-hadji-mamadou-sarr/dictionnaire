@@ -7,12 +7,13 @@ import (
 
 
 func  run_test(dict dictionnary.Dictionnary){
-	dict.Add("one", "its a number")
-	dict.Add("two", "its the result of 1+1")
-	fmt.Println("Get 'one':", dict.Get("one"))
-	dict.List()
-	dict.Remove("two")
-	dict.List()
+	ch_add := make(chan dictionnary.Entry)
+	ch_remove := make(chan string)
+
+	go dict.Add("paris", "its a city in france", ch_add)
+	fmt.Println(<-ch_add)
+	go dict.Remove("paris", ch_remove)
+	fmt.Println(<-ch_remove)
 }
 
 func main() {

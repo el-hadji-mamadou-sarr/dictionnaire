@@ -76,7 +76,7 @@ func NewDictionnary(filePath string) Dictionnary {
 	}
 }
 
-func (dict *Dictionnary) Add(name string, definition string) {
+func (dict *Dictionnary) Add(name string, definition string, ch chan Entry) {
 	entries, err := dict.loadFromFile()
 	if err != nil {
 		fmt.Println("Error loading from file:", err)
@@ -89,6 +89,7 @@ func (dict *Dictionnary) Add(name string, definition string) {
 			fmt.Printf("Updating existing entry '%s': %s to %s\n", name, entry.Definition, definition)
 			entries[i].Definition = definition
 			dict.saving(entries)
+			ch <- entry
 			return
 		}
 	}
@@ -96,6 +97,8 @@ func (dict *Dictionnary) Add(name string, definition string) {
 	entry := Entry{Name: name, Definition: definition}
 	entries = append(entries, entry)
 	dict.saving(entries)
+
+	ch <- entry
 }
 
 func (dict *Dictionnary) Get(name string) string {
@@ -116,7 +119,7 @@ func (dict *Dictionnary) Get(name string) string {
 	return ""
 }
 
-func (dict *Dictionnary) Remove(name string) {
+func (dict *Dictionnary) Remove(name string, ch chan string) {
 	entries, err := dict.loadFromFile()
 	if err != nil {
 		fmt.Println("Error loading from file:", err)
@@ -129,6 +132,7 @@ func (dict *Dictionnary) Remove(name string) {
 			// Remove the entry from the slice
 			entries = append(entries[:i], entries[i+1:]...)
 			dict.saving(entries)
+			ch <- name
 			return
 		}
 	}
