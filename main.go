@@ -11,6 +11,12 @@ type dictionnaire struct {
 	entries  map[string]int
 }
 
+func (dict *dictionnaire) checkError(){
+	if err := dict.saveToFile(); err != nil {
+		fmt.Println("Error saving to file:", err)
+	}
+}
+
 func main() {
 	filePath := "dictionary.json"
 	dict := newDictionary(filePath)
@@ -32,9 +38,7 @@ func newDictionary(filePath string) dictionnaire {
 
 func (dict *dictionnaire) add(key string, value int) {
 	dict.entries[key] = value
-	if err := dict.saveToFile(); err != nil {
-		fmt.Println("Error saving to file:", err)
-	}
+	dict.checkError()
 }
 
 func (dict *dictionnaire) get(key string) int {
@@ -43,9 +47,7 @@ func (dict *dictionnaire) get(key string) int {
 
 func (dict *dictionnaire) remove(key string) {
 	delete(dict.entries, key)
-	if err := dict.saveToFile(); err != nil {
-		fmt.Println("Error saving to file:", err)
-	}
+	dict.checkError()
 }
 
 func (dict *dictionnaire) list() {
@@ -60,5 +62,8 @@ func (dict *dictionnaire) saveToFile() error {
 		return err
 	}
 
-	return ioutil.WriteFile(dict.filePath, data, 0644)
+	return ioutil.WriteFile(dict.filePath, data, 644)
+
+
+
 }
