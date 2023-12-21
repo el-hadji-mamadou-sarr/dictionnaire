@@ -3,21 +3,14 @@ package main
 import (
 	"dictionnaire/dictionnary"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 )
 
 
-func  run_test(dict dictionnary.Dictionnary){
-	// ch_add := make(chan dictionnary.Entry)
-	// ch_remove := make(chan string)
 
-	// go dict.Add("paris", "its a city in france", ch_add)
-	// fmt.Println(<-ch_add)
-	// go dict.Remove("paris", ch_remove)
-	// fmt.Println(<-ch_remove)
-}
 
 
 func add(w http.ResponseWriter, req *http.Request) {
@@ -40,7 +33,7 @@ func add(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Error decoding JSON", http.StatusBadRequest)
 		return
 	}
-	_, err = dict.Add(entry.Name, entry.Definition)
+	_, err = dict.Add(entry.Name, entry.Definition, cs.action)
 	if err != nil {
 		http.Error(w, "Error adding entry", http.StatusInternalServerError)
 		return
@@ -128,16 +121,39 @@ func get(w http.ResponseWriter, req *http.Request) {
 	w.Write(jsonData)
 }
 
+
+
+type ChannelStore struct{
+	action chan string
+}
+
+
+func (cs *ChannelStore) worker() {
+	
+	for {
+		select {
+		case action := <-cs.action:
+			if action == "adding" {
+				fmt.Println("Element is being added, please wait ...")
+			}
+		}
+	}
+}
+
+var cs = ChannelStore{
+	action: make(chan string, 1),
+}
+
 func main() {
+	go cs.worker()
 	
 	http.HandleFunc("/add", add)
-	http.HandleFunc("/get", get)
+	http.HandleFunc("/get/", get)
 	http.HandleFunc("/remove/",remove)
 	http.HandleFunc("/list", list)
  
-	
+
 	http.ListenAndServe(":8090", nil)
-	
 }
 
 

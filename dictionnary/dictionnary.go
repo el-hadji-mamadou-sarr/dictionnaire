@@ -9,7 +9,7 @@ import (
 
 type Entry struct {
 	Name  string `json:"name"`
-	Definition string    `json:"definition"`
+	Definition string `json:"definition"`
 }
 
 type Dictionnary struct {
@@ -74,7 +74,8 @@ func NewDictionnary(filePath string) Dictionnary {
 	}
 }
 
-func (dict *Dictionnary) Add(name string, definition string) (Entry, error) {
+func (dict *Dictionnary) Add(name string, definition string, action chan string) (Entry, error) {
+	action <- "adding"
 	entries, err := dict.loadFromFile()
 	if err != nil {
 		fmt.Println("Error loading from file:", err)
@@ -84,10 +85,10 @@ func (dict *Dictionnary) Add(name string, definition string) (Entry, error) {
 	// check if the name already exists in the dictionnary
 	for i, entry := range entries {
 		if entry.Name == name {
+		
 			fmt.Printf("Updating existing entry '%s': %s to %s\n", name, entry.Definition, definition)
 			entries[i].Definition = definition
 			dict.saving(entries)
-			// ch <- entry
 			return entry, nil
 		}
 	}
@@ -96,7 +97,7 @@ func (dict *Dictionnary) Add(name string, definition string) (Entry, error) {
 	entries = append(entries, entry)
 	dict.saving(entries)
 	return entry, nil
-	// ch <- entry
+
 }
 
 func (dict *Dictionnary) Get(name string) (Entry, error) {
